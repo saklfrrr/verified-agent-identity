@@ -1,0 +1,47 @@
+name: Verify Human Identity
+
+on:
+  workflow_dispatch:
+    inputs:
+      agent_name:
+        description: 'did:iden3:billions:main:2VmFuSdFi4mF18XY78K9FCk3U3BhHbabpVDR2anPrd'
+        required: true
+        default: 'did:iden3:billions:main:2VmFuSdFi4mF18XY78K9FCk3U3BhHbabpVDR2anPrd'
+      agent_description:
+        description: 'did:iden3:billions:main:2VmFuSdFi4mF18XY78K9FCk3U3BhHbabpVDR2anPrd'
+        required: true
+        default: 'did:iden3:billions:main:2VmFuSdFi4mF18XY78K9FCk3U3BhHbabpVDR2anPrd AI Agent'
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    env:
+      ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: true
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # ClawHub removed because CLI is broken
+      # - name: Step 1 - Install ClawHub skill
+      #   run: npx clawdhub@latest install agent-wallet
+
+      - name: Install script dependencies
+        run: |
+          cd scripts
+          npm install
+
+      - name: Step 2 - Create new Ethereum Identity
+        run: node scripts/createNewEthereumIdentity.js
+
+      - name: Step 3 - Link Human to Agent
+        run: |
+          node scripts/manualLinkHumanToAgent.js --challenge '{
+            "name": "did:iden3:billions:main:2VmFuSdFi4mF18XY78K9FCk3U3BhHbabpVDR2anPrd",
+            "description": "did:iden3:billions:main:2VmFuSdFi4mF18XY78K9FCk3U3BhHbabpVDR2anPrd AI Agent"
+          }'
